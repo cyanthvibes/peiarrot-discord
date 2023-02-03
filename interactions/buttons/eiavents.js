@@ -1,5 +1,5 @@
 const { EventAttendance } = require('../../database/sequelize');
-const { loadAttendanceFromDB, generateEIAventEmbed } = require('../../utils/common');
+const { loadAttendanceFromDB, generateEIAventEmbed, generateEIAventRow} = require('../../utils/common');
 
 module.exports = {
 
@@ -11,44 +11,19 @@ module.exports = {
     const eiaventId = embed.data.footer.text;
 
     const {
-      going, notGoing, maybe, lft, selling,
+      going, maybe, lft, selling,
     } = await loadAttendanceFromDB(eiaventId);
 
     if (customId === 'GOING') {
       if (going.includes(memberId)) {
-        going.splice(going.indexOf(memberId), 1);
+        going.splice(lft.indexOf(memberId), 1);
         await EventAttendance.destroy({ where: { event_id: eiaventId, member_id: memberId, response: 'going' } });
       } else {
         going.push(memberId);
         await EventAttendance.create({ member_id: memberId, event_id: eiaventId, response: 'going' });
 
-        try {
-          notGoing.splice(notGoing.indexOf(memberId), 1);
-          await EventAttendance.destroy({ where: { event_id: eiaventId, member_id: memberId, response: 'not-going' } });
-        } catch (e) { /* empty */ }
-
-        try {
-          maybe.splice(maybe.indexOf(memberId), 1);
-          await EventAttendance.destroy({ where: { event_id: eiaventId, member_id: memberId, response: 'maybe' } });
-        } catch (e) { /* empty */ }
-      }
-    }
-
-    if (customId === 'NOT_GOING') {
-      if (notGoing.includes(memberId)) {
-        notGoing.splice(notGoing.indexOf(memberId), 1);
-        await EventAttendance.destroy({ where: { event_id: eiaventId, member_id: memberId, response: 'not-going' } });
-      } else {
-        notGoing.push(memberId);
-        await EventAttendance.create({ member_id: memberId, event_id: eiaventId, response: 'not-going' });
-
-        if (going.includes(memberId)) {
-          going.splice(going.indexOf(memberId), 1);
-          await EventAttendance.destroy({ where: { event_id: eiaventId, member_id: memberId, response: 'going' } });
-        }
-
         if (maybe.includes(memberId)) {
-          maybe.splice(maybe.indexOf(memberId), 1);
+          maybe.splice(selling.indexOf(memberId), 1);
           await EventAttendance.destroy({ where: { event_id: eiaventId, member_id: memberId, response: 'maybe' } });
         }
       }
@@ -56,20 +31,15 @@ module.exports = {
 
     if (customId === 'MAYBE') {
       if (maybe.includes(memberId)) {
-        notGoing.splice(notGoing.indexOf(memberId), 1);
+        maybe.splice(selling.indexOf(memberId), 1);
         await EventAttendance.destroy({ where: { event_id: eiaventId, member_id: memberId, response: 'maybe' } });
       } else {
         maybe.push(memberId);
         await EventAttendance.create({ member_id: memberId, event_id: eiaventId, response: 'maybe' });
 
         if (going.includes(memberId)) {
-          going.splice(going.indexOf(memberId), 1);
+          going.splice(lft.indexOf(memberId), 1);
           await EventAttendance.destroy({ where: { event_id: eiaventId, member_id: memberId, response: 'going' } });
-        }
-
-        if (notGoing.includes(memberId)) {
-          notGoing.splice(notGoing.indexOf(memberId), 1);
-          await EventAttendance.destroy({ where: { event_id: eiaventId, member_id: memberId, response: 'not-going' } });
         }
       }
     }
@@ -105,6 +75,7 @@ module.exports = {
     }
 
     const newEmbed = await generateEIAventEmbed(eiaventId);
-    await interaction.update({ embeds: [newEmbed] });
+    const row = await generateEIAventRow();
+    await interaction.update({ embeds: [newEmbed], components: [row] });
   },
 };

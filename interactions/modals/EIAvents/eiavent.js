@@ -42,10 +42,8 @@ module.exports = {
       const embed = await generateEIAventEmbed(eiaventId);
 
       await targetMessage.edit({
-        content: eiaventDescriptionInput, ephemeral: false, embeds: [embed], components: [row],
+        ephemeral: false, embeds: [embed], components: [row],
       });
-
-      await targetChannel.setName(eiaventName);
 
       await interaction.deleteReply();
     } else if (!eiaventId) {

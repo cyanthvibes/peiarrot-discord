@@ -57,10 +57,14 @@ module.exports.showPrivacyNotice = async (interaction) => {
 
   const { customId } = interaction;
 
-  if (customId === 'yes-privacy-notice' || customId === 'no-privacy-notice' || customId === 'delete-privacy-notice') {
-    await interaction.update({ ephemeral: true, embeds: [embed], components: [row] });
-  } else {
-    await interaction.reply({ ephemeral: true, embeds: [embed], components: [row] });
+  try {
+    if (customId === 'yes-privacy-notice' || customId === 'no-privacy-notice' || customId === 'delete-privacy-notice') {
+      await interaction.update({ ephemeral: true, embeds: [embed], components: [row] });
+    } else {
+      await interaction.reply({ ephemeral: true, embeds: [embed], components: [row] });
+    }
+  } catch (e) {
+    await interaction.editReply({ ephemeral: true, embeds: [embed], components: [row] });
   }
 };
 
@@ -80,17 +84,6 @@ module.exports.loadAttendanceFromDB = async (eiaventId) => {
 
   membersGoingInDB.forEach((g) => {
     going.push(g.dataValues.member_id);
-  });
-
-  const membersNotGoingInDB = await EventAttendance.findAll({
-    where: {
-      event_id: eiaventId,
-      response: 'not-going',
-    },
-  });
-
-  membersNotGoingInDB.forEach((g) => {
-    notGoing.push(g.dataValues.member_id);
   });
 
   const membersMaybeInDB = await EventAttendance.findAll({
@@ -133,7 +126,7 @@ module.exports.loadAttendanceFromDB = async (eiaventId) => {
 
 module.exports.generateEIAventEmbed = async (eiaventId) => {
   const {
-    going, notGoing, maybe, lft, selling,
+    going, maybe, lft, selling,
   } = await this.loadAttendanceFromDB(eiaventId);
 
   const eventInDB = await Event.findByPk(eiaventId);
@@ -160,10 +153,6 @@ module.exports.generateEIAventEmbed = async (eiaventId) => {
     going[going.indexOf(member)] = `<@!${member}>`;
   });
 
-  for (const m of notGoing) {
-    notGoing[notGoing.indexOf(m)] = `<@!${m}>`;
-  }
-
   for (const m of maybe) {
     maybe[maybe.indexOf(m)] = `<@!${m}>`;
   }
@@ -183,13 +172,8 @@ module.exports.generateEIAventEmbed = async (eiaventId) => {
       inline: false,
     },
     {
-      name: notGoing.length > 0 ? `<:not_going:${emojis.NOT_GOING}> Not going(${notGoing.length})` : `<:not_going:${emojis.NOT_GOING}> Not going`,
-      value: notGoing.length > 0 ? notGoing.join('\n') : '-',
-      inline: false,
-    },
-    {
       name: maybe.length > 0 ? `<:maybe:${emojis.MAYBE}> Maybe (${maybe.length})` : `<:maybe:${emojis.MAYBE}> Maybe`,
-      value: maybe.length > 0 ? maybe.join('\\n') : '-',
+      value: maybe.length > 0 ? maybe.join('\n') : '-',
       inline: false,
     },
     { name: '\u200b', value: '\u200b' },

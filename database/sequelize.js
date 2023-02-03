@@ -7,7 +7,7 @@ require('dotenv').config();
 
 const config = require('../config');
 
-const sequelize = new Sequelize(`postgres://${config.DATABASE_USERNAME}:${config.DATABASE_PASSWORD}@localhost:${config.DATABASE_PORT}`, {
+const sequelize = new Sequelize(`postgres://${config.DATABASE_USERNAME}:${config.DATABASE_PASSWORD}@localhost:${config.DATABASE_PORT}/${config.DATABASE_NAME}`, {
   logging: false,
 });
 
@@ -33,10 +33,10 @@ const Event = sequelize.define(
       type: DataTypes.STRING,
     },
     event_description: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     image_url: {
-      type: DataTypes.STRING,
+      type: DataTypes.TEXT,
     },
     guild_channel_id: {
       type: DataTypes.STRING,

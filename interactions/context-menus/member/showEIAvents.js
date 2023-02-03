@@ -23,7 +23,6 @@ module.exports = {
 
     const arr = [
       ['Going to:', 'going'],
-      ['Not going to:', 'not-going'],
       ['Maybe going to:', 'maybe'],
       ['Looking for tickets for: ', 'lft'],
       ['Selling tickets for:', 'selling'],

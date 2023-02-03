@@ -10,7 +10,10 @@ module.exports = {
     const memberId = interaction.member.id;
 
     if (customId === 'yes-privacy-notice') {
-      await Member.create({ member_id: memberId });
+      await interaction.deferReply({ ephemeral: true });
+      try {
+        await Member.create({ member_id: memberId });
+      } catch (err) { /* empty */ }
       await showPrivacyNotice(interaction);
     }
 
@@ -21,11 +24,14 @@ module.exports = {
     }
 
     if (customId === 'delete-privacy-notice') {
-      await Member.destroy({
-        where: {
-          member_id: memberId,
-        },
-      });
+      await interaction.deferReply({ ephemeral: true });
+      try {
+        await Member.destroy({
+          where: {
+            member_id: memberId,
+          },
+        });
+      } catch (err) { /* empty */ }
 
       await refreshAllEIAventEmbeds(interaction);
 
