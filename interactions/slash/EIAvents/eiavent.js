@@ -24,6 +24,10 @@ module.exports = {
     .addSubcommand((subcommand) => subcommand
       .setName('delete')
       .setDescription('Delete an event')
+      .addStringOption((option) => option.setName('eiavent_id').setDescription('ID of event').setRequired(true)))
+    .addSubcommand((subcommand) => subcommand
+      .setName('restore')
+      .setDescription('Restore a deleted event')
       .addStringOption((option) => option.setName('eiavent_id').setDescription('ID of event').setRequired(true))),
 
   async execute(interaction) {

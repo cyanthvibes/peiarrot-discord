@@ -4,7 +4,7 @@ const { ActivityType } = require('discord.js');
 
 module.exports = {
   execute(client) {
-    console.log(`Logged in as ${client.user.tag}`);
+    console.log(`Logged in as ${client.user.username}`);
 
     let state = 0;
     const i = 0;
